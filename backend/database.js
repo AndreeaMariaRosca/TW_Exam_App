@@ -1,7 +1,7 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 
 
-const sequelize = new Sequelize('examen_tw', 'root', 'myXAMPPPassword01', {
+const sequelize = new Sequelize('bd_examen', 'root', 'myXAMPPPassword01', {
     host: 'localhost',
     dialect: 'mariadb',
     "define":{
@@ -13,11 +13,12 @@ const sequelize = new Sequelize('examen_tw', 'root', 'myXAMPPPassword01', {
 );
 
 
-class Company extends Model {};
-Company.init({
-    name: {
+class Movie extends Model {};
+Movie.init({
+    title: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate:{len: [3,20]}
     },
     date: DataTypes.DATE,
     id: {
@@ -25,26 +26,28 @@ Company.init({
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
-    }
-}, { sequelize, modelName: 'company'});
+    },
+    category: DataTypes.ENUM('Thriller', 'Horror', 'Comedy', 'Romance', 'SF')
+}, { sequelize, modelName: 'movie'});
 
-class Founder extends Model {};
-Founder.init({
+class CrewMember extends Model {};
+CrewMember.init({
     name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate:{len: [3,20]}
     },
-    position: DataTypes.ENUM('CEO', 'CTO'),
+    position: DataTypes.ENUM('Director', 'Writer'),
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
     },
-}, {sequelize, modelName: 'founder'});
+}, {sequelize, modelName: 'crewMember'});
 
 
-Company.hasMany(Founder);
+Movie.hasMany(CrewMember);
 
 const testConnection = async () => {
     try {
@@ -55,4 +58,4 @@ const testConnection = async () => {
       }    
 };
 
-module.exports = { testConnection, sequelize, Founder, Company };
+module.exports = { testConnection, sequelize, CrewMember, Movie };

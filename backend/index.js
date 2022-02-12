@@ -1,18 +1,18 @@
 const express = require('express');
 const cors = require('cors')
 const testConnection = require('./database').testConnection;
-const handleInsertRecord = require('./Company.service').handleInsertRecord;
-const handleSelectRecords = require('./Company.service').handleSelectRecords;
-const handleSelectRecordsById = require('./Company.service').handleSelectRecordsById;
-const handleUpdateRecord = require('./Company.service').handleUpdateRecord;
-const handleSelectRecordsWithQuery = require('./Company.service').handleSelectRecordsWithQuery;
-const handleDelete = require('./Company.service').handleDelete;
-const handleSelectRecordsPaginated = require('./Company.service').handleSelectRecordsPaginated;
-const handleSelectRecordsSorted = require('./Company.service').handleSelectRecordsSorted;
-const handleSelectRecordsFiltered = require('./Company.service').handleSelectRecordsFiltered;
+const handleInsertRecord = require('./Movie.service').handleInsertRecord;
+const handleSelectRecords = require('./Movie.service').handleSelectRecords;
+const handleSelectRecordsById = require('./Movie.service').handleSelectRecordsById;
+const handleUpdateRecord = require('./Movie.service').handleUpdateRecord;
+const handleSelectRecordsWithQuery = require('./Movie.service').handleSelectRecordsWithQuery;
+const handleDelete = require('./Movie.service').handleDelete;
+const handleSelectRecordsPaginated = require('./Movie.service').handleSelectRecordsPaginated;
+const handleSelectRecordsSorted = require('./Movie.service').handleSelectRecordsSorted;
+const handleSelectRecordsFiltered = require('./Movie.service').handleSelectRecordsFiltered;
 
-const Company = require('./database').Company;
-const Founder = require('./database').Founder;
+const Movie = require('./database').Movie;
+const CrewMember = require('./database').CrewMember;
 const sequelize = require('./database').sequelize;
 
 const bodyParser = require('body-parser');
@@ -26,9 +26,9 @@ app.get('/about', (req, res) => {
 });
 
 // get all Companies
-app.get('/company', async (request, response) => {
+app.get('/movie', async (request, response) => {
     try {
-        await handleSelectRecords(Company, response);
+        await handleSelectRecords(Movie, response);
         response.status(200).json(records).send();
     }
     catch (err) {
@@ -41,12 +41,12 @@ app.get('/company', async (request, response) => {
 
 // ------------ filter, sort, pagination ---------
 
-app.get('/company/paginate', async (request, response) => {
+app.get('/movie/paginate', async (request, response) => {
     const page = request.query.page;
     const pageSize = request.query.pageSize;
 
     try {
-        await handleSelectRecordsPaginated(Company, page, pageSize, response);
+        await handleSelectRecordsPaginated(Movie, page, pageSize, response);
         response.status(200).send();
     }
     catch (err) {
@@ -57,7 +57,7 @@ app.get('/company/paginate', async (request, response) => {
     }
 });
 
-app.get('/company/sort', async (request, response) => {
+app.get('/movie/sort', async (request, response) => {
     const { field, direction } = request.query;
     if (!field || !direction || (direction != 'ASC' && direction != 'DESC')) {
         return response.status(400).json({
@@ -66,7 +66,7 @@ app.get('/company/sort', async (request, response) => {
     }
 
     try {
-        await handleSelectRecordsSorted(Company, field, direction, response);
+        await handleSelectRecordsSorted(Movie, field, direction, response);
         response.status(200).send();
     }
     catch (err) {
@@ -77,11 +77,11 @@ app.get('/company/sort', async (request, response) => {
     }
 });
 
-app.get('/company/filter', async (request, response) => {
+app.get('/movie/filter', async (request, response) => {
     const fields = request.query;
     console.log(fields);
     try {
-        await handleSelectRecordsFiltered(Company, fields, response);
+        await handleSelectRecordsFiltered(Movie, fields, response);
         response.status(200).send();
     }
     catch (err) {
@@ -95,9 +95,9 @@ app.get('/company/filter', async (request, response) => {
 
 // ----- rest of CRUD -----
 
-app.get('/company/:id', async (req, response) => {
+app.get('/movie/:id', async (req, response) => {
     try {
-        const record = await handleSelectRecordsById(Company, req.params.id);
+        const record = await handleSelectRecordsById(Movie, req.params.id);
         if (record == null) {
             return response.status(404).send();
         }
@@ -111,12 +111,12 @@ app.get('/company/:id', async (req, response) => {
     }
 })
 
-app.post('/company', async (request, response) => {
+app.post('/movie', async (request, response) => {
     console.log(request.body);
     try {
-        const record = await handleInsertRecord(Company, request, response);
+        const record = await handleInsertRecord(Movie, request, response);
         response.status(201).json({
-            message: "Created successfully a new Company",
+            message: "Created successfully a new Movie",
             data: record
         });
     }
@@ -128,16 +128,16 @@ app.post('/company', async (request, response) => {
 })
 
 
-app.put('/company/:id', async (request, response) => {
+app.put('/movie/:id', async (request, response) => {
     console.log(request.body);
     try {
-        const record = await handleUpdateRecord(Company, request.params.id, request.body);
+        const record = await handleUpdateRecord(Movie, request.params.id, request.body);
         if (record == null) {
             return response.status(404).send();
         }
 
         response.status(200).json({
-            message: "Updated successfully the Company",
+            message: "Updated successfully the Movie",
             data: record
         });
     }
@@ -149,9 +149,9 @@ app.put('/company/:id', async (request, response) => {
     }
 })
 
-app.delete('/company/:id', async (request, response) => {
+app.delete('/movie/:id', async (request, response) => {
     try {
-        await handleDelete(Company, request.params.id, response);
+        await handleDelete(Movie, request.params.id, response);
         response.status(200).send();
     }
     catch (err) {
@@ -165,9 +165,9 @@ app.delete('/company/:id', async (request, response) => {
 
 // -------------------------- subresource ----------------- // 
 
-app.get('/company/:id/Founder', async (req, response) => {
+app.get('/movie/:id/crewMember', async (req, response) => {
     try {
-        await handleSelectRecordsWithQuery(Founder, { CompanyId: req.params.id }, response);
+        await handleSelectRecordsWithQuery(CrewMember, { MovieId: req.params.id }, response);
         response.status(200).send();
     }
     catch (err) {
@@ -180,9 +180,9 @@ app.get('/company/:id/Founder', async (req, response) => {
 
 //  ----------- BASIC CRUD -----------
 
-app.get('/founder/:id', async (req, response) => {
+app.get('/crewMember/:id', async (req, response) => {
     try {
-        const record = await handleSelectRecordsById(Founder, req.params.id, response);
+        const record = await handleSelectRecordsById(CrewMember, req.params.id, response);
         if (record == null) {
             return response.status(404).send();
         }
@@ -196,12 +196,12 @@ app.get('/founder/:id', async (req, response) => {
     }
 })
 
-app.post('/founder', async (request, response) => {
+app.post('/crewMember', async (request, response) => {
     console.log(request.body);
     try {
-        const record = await handleInsertRecord(Founder, request, response);
+        const record = await handleInsertRecord(CrewMember, request, response);
         response.status(201).json({
-            message: "Created successfully a new Founder",
+            message: "Created successfully a new CrewMember",
             data: record
         });
     }
@@ -212,16 +212,16 @@ app.post('/founder', async (request, response) => {
     }
 })
 
-app.put('/founder/:id', async (request, response) => {
+app.put('/crewMember/:id', async (request, response) => {
     console.log(request.body);
     try {
-        const record = await handleUpdateRecord(Founder, request.params.id, request.body);
+        const record = await handleUpdateRecord(CrewMember, request.params.id, request.body);
         if (record == null) {
             return response.status(404).send();
         }
 
         response.status(200).json({
-            message: "Updated successfully the Founder",
+            message: "Updated successfully the CrewMember",
             data: record
         });
     }
@@ -233,9 +233,9 @@ app.put('/founder/:id', async (request, response) => {
     }
 })
 
-app.delete('/founder/:id', async (request, response) => {
+app.delete('/crewMember/:id', async (request, response) => {
     try {
-        await handleDelete(Founder, request.params.id, response);
+        await handleDelete(CrewMember, request.params.id, response);
         response.status(200).send();
     }
     catch (err) {
